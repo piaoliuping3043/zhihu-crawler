@@ -1,21 +1,17 @@
 package com.crawl.proxy;
 
+import com.crawl.core.util.Constants;
 import com.crawl.proxy.entity.Direct;
 import com.crawl.proxy.entity.Proxy;
-import com.crawl.proxy.site.ip181.Ip181ProxyListPageParser;
 import com.crawl.proxy.site.ip66.Ip66ProxyListPageParser;
 import com.crawl.proxy.site.mimiip.MimiipProxyListPageParser;
 import com.crawl.proxy.site.xicidaili.XicidailiProxyListPageParser;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.DelayQueue;
-import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-import static com.crawl.core.util.Constants.TIME_INTERVAL;
 
 /**
  * 代理池
@@ -46,7 +42,7 @@ public class ProxyPool {
                 proxyMap.put("http://www.66ip.cn/areaindex_" + j + "/" + i + ".html", Ip66ProxyListPageParser.class);
             }
         }
-        proxyQueue.add(new Direct(TIME_INTERVAL));
+        proxyQueue.add(new Direct(Constants.TIME_INTERVAL));
     }
 
 }

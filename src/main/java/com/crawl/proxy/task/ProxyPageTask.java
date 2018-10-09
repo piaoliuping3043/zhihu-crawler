@@ -62,7 +62,7 @@ public class ProxyPageTask implements Runnable{
 					"  executing request " + page.getUrl()  + " response statusCode:" + status +
 					"  request cost time:" + (requestEndTime - requestStartTime) + "ms";
 			if(status == HttpStatus.SC_OK){
-				logger.debug(logStr);
+				logger.info(logStr);
 				handle(page);
 			} else {
 				logger.error(logStr);

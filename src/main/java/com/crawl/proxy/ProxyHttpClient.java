@@ -17,8 +17,18 @@ import java.util.concurrent.TimeUnit;
 
 public class ProxyHttpClient extends AbstractHttpClient {
     private static final Logger logger = LoggerFactory.getLogger(ProxyHttpClient.class);
+
     private volatile static ProxyHttpClient instance;
-    public static Set<Page> downloadFailureProxyPageSet = new HashSet<>(ProxyPool.proxyMap.size());
+
+//    public static Set<Page> downloadFailureProxyPageSet = new HashSet<>(ProxyPool.proxyMap.size());
+    /**
+     * 代理测试线程池
+     */
+    private ThreadPoolExecutor proxyTestThreadExecutor;
+    /**
+     * 代理网站下载线程池
+     */
+    private ThreadPoolExecutor proxyDownloadThreadExecutor;
 
     public static ProxyHttpClient getInstance(){
         if (instance == null){
@@ -30,14 +40,6 @@ public class ProxyHttpClient extends AbstractHttpClient {
         }
         return instance;
     }
-    /**
-     * 代理测试线程池
-     */
-    private ThreadPoolExecutor proxyTestThreadExecutor;
-    /**
-     * 代理网站下载线程池
-     */
-    private ThreadPoolExecutor proxyDownloadThreadExecutor;
     public ProxyHttpClient(){
         initThreadPool();
         initProxy();
@@ -92,31 +94,31 @@ public class ProxyHttpClient extends AbstractHttpClient {
      * 抓取代理
      */
     public void startCrawl(){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (true){
-                    for (String url : ProxyPool.proxyMap.keySet()){
-                        /**
-                         * 首次本机直接下载代理页面
-                         */
-                        proxyDownloadThreadExecutor.execute(new ProxyPageTask(url, false));
-                        try {
-                            Thread.sleep(1000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    try {
-                        Thread.sleep(1000 * 60 * 60);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }).start();
+        //检测代理ip
+        new Thread(() -> threadGo()).start();
+        //序列化到文件
         new Thread(new ProxySerializeTask()).start();
     }
+
+    void threadGo(){
+        while (true){
+            for (String url : ProxyPool.proxyMap.keySet()){
+                //首次本机直接下载代理页面
+                proxyDownloadThreadExecutor.execute(new ProxyPageTask(url, false));
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            try {
+                Thread.sleep(1000 * 60 * 60);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     public ThreadPoolExecutor getProxyTestThreadExecutor() {
         return proxyTestThreadExecutor;
     }
@@ -124,4 +126,5 @@ public class ProxyHttpClient extends AbstractHttpClient {
     public ThreadPoolExecutor getProxyDownloadThreadExecutor() {
         return proxyDownloadThreadExecutor;
     }
+
 }
